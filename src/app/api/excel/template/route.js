@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
+import { LEVEL_DISPLAY_NAMES } from '../../../../lib/level-constants';
 
 export async function GET() {
   try {
@@ -12,7 +13,7 @@ export async function GET() {
       ['', '', '', '', ''],
       ['項目', '入力内容', '説明・注意事項', '', ''],
       ['タイトル', '例：ももたろう', '必須：コンテンツのタイトル', '', ''],
-      ['レベル', '初級修了レベル', '初級修了レベル / 中級レベル / 上級レベル から選択', '', ''],
+      ['レベル', LEVEL_DISPLAY_NAMES.BEGINNER, `${LEVEL_DISPLAY_NAMES.BEGINNER} / ${LEVEL_DISPLAY_NAMES.INTERMEDIATE} / ${LEVEL_DISPLAY_NAMES.ADVANCED} から選択`, '', ''],
       ['本文', 'ここに本文を入力してください。', '必須：速読練習用の本文。改行はそのまま反映されます。ルビの記法：｜漢字《かんじ》または漢字《かんじ》', '', ''],
       ['文章の解説', 'ここに文章の解説を入力してください。', '任意：文章の背景や解説を記入', '', ''],
       ['', '', '', '', ''],
@@ -98,7 +99,7 @@ export async function GET() {
       ['1. 基本情報の入力', ''],
       ['・「コンテンツ」シートの「項目」列に対して「入力内容」列に記入してください', ''],
       ['・タイトルは必須です', ''],
-      ['・レベルは「初級修了レベル」「中級レベル」「上級レベル」から選択してください', ''],
+      [`・レベルは「${LEVEL_DISPLAY_NAMES.BEGINNER}」「${LEVEL_DISPLAY_NAMES.INTERMEDIATE}」「${LEVEL_DISPLAY_NAMES.ADVANCED}」から選択してください`, ''],
       ['', ''],
       ['2. 本文の入力', ''],
       ['・「コンテンツ」シートの本文欄に読解練習用の文章を入力してください', ''],

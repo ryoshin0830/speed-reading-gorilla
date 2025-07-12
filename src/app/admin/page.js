@@ -2,6 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import ContentEditor from '../../components/ContentEditor';
+import LevelManager from '../../components/LevelManager';
+import { 
+  LEVEL_CODES, 
+  getLevelDisplayName,
+  getLevelStyle 
+} from '../../lib/level-constants';
 
 const ADMIN_PASSWORD = 'gorira';
 
@@ -17,6 +23,7 @@ export default function Admin() {
   const [showExcelUpload, setShowExcelUpload] = useState(false);
   const [excelUploadLoading, setExcelUploadLoading] = useState(false);
   const [excelData, setExcelData] = useState(null);
+  const [activeTab, setActiveTab] = useState('contents'); // 'contents' or 'levels'
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -210,21 +217,25 @@ export default function Admin() {
     <div className="max-w-7xl mx-auto px-4 py-8 sm:py-12 pb-safe-area-inset-bottom pb-6">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">
-          コンテンツ管理画面
+          管理画面
         </h1>
         <div className="flex flex-wrap gap-4">
-          <button
-            onClick={handleCreate}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
-          >
-            新規作成
-          </button>
-          <button
-            onClick={() => setShowExcelUpload(true)}
-            className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-          >
-            Excelで作成
-          </button>
+          {activeTab === 'contents' && (
+            <>
+              <button
+                onClick={handleCreate}
+                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors font-semibold"
+              >
+                新規作成
+              </button>
+              <button
+                onClick={() => setShowExcelUpload(true)}
+                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                Excelで作成
+              </button>
+            </>
+          )}
           <button
             onClick={() => setIsAuthenticated(false)}
             className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors"
@@ -234,13 +245,42 @@ export default function Admin() {
         </div>
       </div>
 
+      {/* タブ切り替え */}
+      <div className="mb-6 border-b border-gray-200">
+        <nav className="-mb-px flex space-x-8">
+          <button
+            onClick={() => setActiveTab('contents')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'contents'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            コンテンツ管理
+          </button>
+          <button
+            onClick={() => setActiveTab('levels')}
+            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'levels'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            レベル管理
+          </button>
+        </nav>
+      </div>
+
       {error && (
         <div className="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
           <div className="text-red-600">{error}</div>
         </div>
       )}
 
-      <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+      {/* コンテンツ管理タブ */}
+      {activeTab === 'contents' && (
+        <>
+          <div className="bg-white rounded-lg shadow-md p-6 mb-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-semibold text-gray-900">
             コンテンツ一覧
@@ -287,13 +327,7 @@ export default function Admin() {
                       </button>
                     </td>
                     <td className="px-4 py-2">
-                      <span className={`inline-block px-2 py-1 rounded text-xs ${
-                        content.levelCode === 'beginner' 
-                          ? 'bg-blue-100 text-blue-800'
-                          : content.levelCode === 'intermediate'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-purple-100 text-purple-800'
-                      }`}>
+                      <span className={`inline-block px-2 py-1 rounded text-xs ${getLevelStyle(content.levelCode)}`}>
                         {content.level}
                       </span>
                     </td>
@@ -338,9 +372,9 @@ export default function Admin() {
             )}
           </div>
         )}
-      </div>
+          </div>
 
-      <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
         <div className="bg-white rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">
             統計情報
@@ -356,16 +390,16 @@ export default function Admin() {
               <div className="text-sm text-gray-600">レベル別内訳</div>
               <div className="space-y-1">
                 <div className="flex justify-between text-gray-800">
-                  <span>初級レベル</span>
-                  <span>{contents.filter(c => c.levelCode === 'beginner').length}</span>
+                  <span>{getLevelDisplayName(LEVEL_CODES.BEGINNER)}</span>
+                  <span>{contents.filter(c => c.levelCode === LEVEL_CODES.BEGINNER).length}</span>
                 </div>
                 <div className="flex justify-between text-gray-800">
-                  <span>中級レベル</span>
-                  <span>{contents.filter(c => c.levelCode === 'intermediate').length}</span>
+                  <span>{getLevelDisplayName(LEVEL_CODES.INTERMEDIATE)}</span>
+                  <span>{contents.filter(c => c.levelCode === LEVEL_CODES.INTERMEDIATE).length}</span>
                 </div>
                 <div className="flex justify-between text-gray-800">
-                  <span>上級レベル</span>
-                  <span>{contents.filter(c => c.levelCode === 'advanced').length}</span>
+                  <span>{getLevelDisplayName(LEVEL_CODES.ADVANCED)}</span>
+                  <span>{contents.filter(c => c.levelCode === LEVEL_CODES.ADVANCED).length}</span>
                 </div>
               </div>
             </div>
@@ -395,7 +429,14 @@ export default function Admin() {
             </div>
           </div>
         </div>
-      </div>
+          </div>
+        </>
+      )}
+
+      {/* レベル管理タブ */}
+      {activeTab === 'levels' && (
+        <LevelManager />
+      )}
 
       {/* Excel Upload Modal */}
       {showExcelUpload && (

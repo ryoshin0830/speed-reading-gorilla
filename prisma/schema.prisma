@@ -10,11 +10,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Level {
+  id          String    @id // レベルコード（beginner, intermediate, advanced等）
+  displayName String    // 表示名（中級前半、中級レベル等）
+  orderIndex  Int       // 表示順序
+  isDefault   Boolean   @default(false) // デフォルトレベルフラグ
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  contents    Content[] // このレベルに属するコンテンツ
+  
+  @@map("levels")
+}
+
 model Content {
   id          String    @id @default(cuid())
   title       String
-  level       String    // 表示用レベル名（例：初級修了レベル）
-  levelCode   String    // システム内部レベルコード（beginner, intermediate, advanced）
+  level       String    // 表示用レベル名（例：中級前半）- 互換性のため保持
+  levelCode   String    // レベルテーブルへの外部キー
   text        String    @db.Text
   explanation String?   @db.Text // 文章の解説（オプション）
   images      Json?     // 複数画像データ（Base64形式）
@@ -22,7 +35,8 @@ model Content {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   
-  questions Question[]
+  levelData   Level?    @relation(fields: [levelCode], references: [id])
+  questions   Question[]
   
   @@map("contents")
 }

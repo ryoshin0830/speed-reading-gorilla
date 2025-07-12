@@ -70,16 +70,30 @@ SuiReN is a Next.js 15 web application for Japanese language learners to practic
 4. **Results**: QR codes colored by score (Red <70%, Blue 70-80%, Green >80%)
 
 #### API Design
-- RESTful endpoints at /api/contents/*
-- Supports full CRUD operations
-- Transaction support for complex updates
-- Base64 image support with placeholder system ({{IMAGE:id}})
-- Excel import/export functionality
+- **Content Management**: RESTful endpoints at /api/contents/*
+  - Supports full CRUD operations
+  - Transaction support for complex updates
+  - Base64 image support with placeholder system ({{IMAGE:id}})
+  - Excel import/export functionality
+- **Level Management**: RESTful endpoints at /api/levels/*
+  - GET /api/levels - List all levels ordered by orderIndex
+  - POST /api/levels - Create new level
+  - PUT /api/levels/[id] - Update level display name or order
+  - DELETE /api/levels/[id]?targetLevelId=X - Delete level and migrate content
+  - PUT /api/levels/[id]/set-default - Set as default level
 
 ### Database Schema
 ```prisma
+Level {
+  id (string, primary key)
+  displayName (string)
+  orderIndex (int)
+  isDefault (boolean)
+  contents → Content[]
+}
+
 Content {
-  id, title, level, levelCode
+  id, title, level, levelCode → Level
   text (with {{IMAGE:id}} placeholders)
   images (JSON array of Base64 images)
   questions → Question[] → QuestionOption[]
@@ -95,6 +109,16 @@ Content {
 - **Cookie Storage**: js-cookie for client preferences
 
 ### Important Implementation Details
+
+#### Level System Mapping
+- **IMPORTANT**: Level codes and display names use different values for historical reasons
+- Level mapping is centralized in `src/lib/level-constants.js`
+- Database uses these level codes:
+  - `beginner` → Displayed as "中級前半" (formerly "初級修了レベル")
+  - `intermediate` → Displayed as "中級レベル"
+  - `advanced` → Displayed as "上級レベル"
+- Always use the level constants instead of hardcoding values
+- This mapping ensures backward compatibility with existing data
 
 #### Next.js 15 Compatibility
 - All API routes use `await params` for dynamic segments
@@ -129,10 +153,25 @@ Content {
 
 ### Common Tasks
 
+#### Managing Levels
+The system now supports dynamic level management:
+1. Navigate to /admin (password: gorira) and click "レベル管理" tab
+2. Add new levels with custom IDs and display names
+3. Edit level names by clicking on them
+4. Reorder levels using up/down arrows
+5. Delete levels (content will be migrated to selected target level)
+6. Set default level for new content
+
+To populate initial levels in the database:
+```bash
+node scripts/migrate-levels.js
+```
+
 #### Adding New Content
 1. Navigate to /admin (password: gorira)
 2. Use the form or upload Excel template
 3. Images will be automatically compressed and converted to Base64
+4. Levels are dynamically loaded from the database
 
 #### Modifying Question Types
 Questions support multiple choice format with explanations. To add new question types, modify:

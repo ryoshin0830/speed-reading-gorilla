@@ -1,5 +1,11 @@
 import { NextResponse } from 'next/server';
 import * as XLSX from 'xlsx';
+import { 
+  LEVEL_CODES,
+  LEVEL_DISPLAY_NAMES,
+  DISPLAY_NAME_TO_LEVEL_CODE,
+  getLevelCode
+} from '../../../../lib/level-constants';
 
 export async function POST(request) {
   try {
@@ -33,7 +39,7 @@ export async function POST(request) {
 
     // Extract basic information using new table format
     let title = '';
-    let level = '初級修了レベル';
+    let level = LEVEL_DISPLAY_NAMES.BEGINNER;
     let text = '';
     let explanation = '';
 
@@ -50,7 +56,7 @@ export async function POST(request) {
         title = row[1].toString().trim();
       } else if (row[0] === 'レベル' && row[1]) {
         const levelValue = row[1].toString().trim();
-        if (['初級修了レベル', '中級レベル', '上級レベル'].includes(levelValue)) {
+        if ([LEVEL_DISPLAY_NAMES.BEGINNER, LEVEL_DISPLAY_NAMES.INTERMEDIATE, LEVEL_DISPLAY_NAMES.ADVANCED].includes(levelValue)) {
           level = levelValue;
         }
       } else if (row[0] === '本文' && row[1]) {
@@ -229,18 +235,7 @@ export async function POST(request) {
     }
 
     // Determine level code
-    let levelCode = 'beginner';
-    switch (level) {
-      case '初級修了レベル':
-        levelCode = 'beginner';
-        break;
-      case '中級レベル':
-        levelCode = 'intermediate';
-        break;
-      case '上級レベル':
-        levelCode = 'advanced';
-        break;
-    }
+    const levelCode = getLevelCode(level);
 
     // Prepare the content data
     const contentData2 = {

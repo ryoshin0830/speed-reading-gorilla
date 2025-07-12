@@ -226,7 +226,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-800 mb-2">レベル別コンテンツ</h3>
-                  <p className="text-gray-600">初級から上級まで、段階的に速読力を向上</p>
+                  <p className="text-gray-600">中級前半から上級まで、段階的に速読力を向上</p>
                 </div>
               </div>
 
